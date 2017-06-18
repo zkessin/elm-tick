@@ -1,3 +1,4 @@
 
 elm:
-	elm make --yes Main.elm	--output=main.html --warn --debug
+	elm make --yes Counter.elm	--output=counter.html --warn --debug
+	xdg-open counter.html

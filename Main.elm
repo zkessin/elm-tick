@@ -1,7 +1,8 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Time exposing (every, minute, second, Time)
+import Html.Events exposing (onClick)
+import Time exposing (Time, every, minute, second)
 
 
 -- MODEL
@@ -9,27 +10,36 @@ import Time exposing (every, minute, second, Time)
 
 type alias Model =
     { time : Maybe Time.Time
+    , count : Int
     }
 
 
 type Msg
     = Tick Time.Time
+    | Increment
+    | Reset
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model Nothing, Cmd.none )
+    ( Model Nothing 0, Cmd.none )
 
 
 
 -- UPDATE
 
 
-update : Msg -> Model -> ( Model, Cmd a )
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Tick newTime ->
             ( { model | time = Just newTime }, Cmd.none )
+
+        Increment ->
+            ( { model | count = model.count + 1 }, Cmd.none )
+
+        Reset ->
+            ( { model | count = 0 }, Cmd.none )
 
 
 
@@ -38,12 +48,27 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    case model.time of
-        Just time ->
-            p [] [ text <| toString time ]
+    div []
+        [ div []
+            [ text <|
+                toString <|
+                    Maybe.withDefault 0 <|
+                        model.time
+            ]
+        , case model.time of
+            Just time ->
+                p [] [ text <| toString time ]
 
-        Nothing ->
-            p [] [ text "Initializing Time" ]
+            Nothing ->
+                p [] [ text "Initializing Time" ]
+        , br [] []
+        , div []
+            [ text <| toString model.count
+            , text ""
+            , button [ onClick Increment ] [ text "+" ]
+            , button [ onClick Reset ] [ text "Reset" ]
+            ]
+        ]
 
 
 
@@ -52,8 +77,7 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch
-        [ every second Tick ]
+    every minute Tick
 
 
 main : Program Never Model Msg
